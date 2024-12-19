@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -27,8 +28,10 @@ type StmtExecutable struct {
 }
 
 var (
-	reStringLiteralSingle = regexp.MustCompile(`'[^']*'`)
-	reStringLiteralDouble = regexp.MustCompile(`"[^\"]*"`)
+	reStringLiteralSingle         = regexp.MustCompile(`'[^']*'`)
+	reStringLiteralDouble         = regexp.MustCompile(`"[^\"]*"`)
+	TableColumnDesiredTypesMapKey = "go_dynamo_table_column_desired_types_map"
+	TableNameKey                  = "go_dynamo_table_name"
 )
 
 func (s *StmtExecutable) parse() error {
@@ -147,9 +150,28 @@ func (s *StmtSelect) QueryContext(ctx context.Context, values []driver.NamedValu
 	// 	return &TxResultResultSet{wrap: ResultResultSet{err: err}, outputFn: outputFn}, nil
 	// }
 	result := (&ResultResultSet{
-		stmtOutput: outputFn(),
-		columnList: extractSelectedColumnList(s.query)}).init()
+		stmtOutput:         outputFn(),
+		columnDesiredTypes: getcolumnDesiredTypes(ctx),
+		columnList:         extractSelectedColumnList(s.query)}).init()
+
 	return result, err
+}
+
+func getcolumnDesiredTypes(ctx context.Context) map[string]reflect.Type {
+	if ctx == nil || ctx.Value(TableColumnDesiredTypesMapKey) == nil || ctx.Value(TableNameKey) == nil {
+		return nil
+	}
+	tableName := ctx.Value(TableNameKey).(string)
+	if tableName == "" {
+		return nil
+	}
+	TableColumnDesiredTypes := ctx.Value(TableColumnDesiredTypesMapKey).(map[string]map[string]reflect.Type)
+	if TableColumnDesiredTypes != nil {
+		if columnDesiredTypes, ok := TableColumnDesiredTypes[tableName]; ok {
+			return columnDesiredTypes
+		}
+	}
+	return nil
 }
 
 // extractSelectedColumnList returns a slice of selected column names from the query.
@@ -208,7 +230,7 @@ func (s *StmtUpdate) Query(values []driver.Value) (driver.Rows, error) {
 // @Available since v0.2.0
 func (s *StmtUpdate) QueryContext(ctx context.Context, values []driver.NamedValue) (driver.Rows, error) {
 	outputFn, err := s.conn.executeContext(ctx, s.Stmt, values)
-	result := (&ResultResultSet{stmtOutput: outputFn()}).init()
+	result := (&ResultResultSet{stmtOutput: outputFn(), columnDesiredTypes: getcolumnDesiredTypes(ctx)}).init()
 	if err == nil || IsAwsError(err, "ConditionalCheckFailedException") {
 		err = nil
 	}
@@ -266,7 +288,7 @@ func (s *StmtDelete) Query(values []driver.Value) (driver.Rows, error) {
 // @Available since v0.2.0
 func (s *StmtDelete) QueryContext(ctx context.Context, values []driver.NamedValue) (driver.Rows, error) {
 	outputFn, err := s.conn.executeContext(ctx, s.Stmt, values)
-	result := (&ResultResultSet{stmtOutput: outputFn()}).init()
+	result := (&ResultResultSet{stmtOutput: outputFn(), columnDesiredTypes: getcolumnDesiredTypes(ctx)}).init()
 	if err == nil || IsAwsError(err, "ConditionalCheckFailedException") {
 		err = nil
 	}

@@ -269,13 +269,14 @@ func (r *ResultNoResultSet) RowsAffected() (int64, error) {
 
 // ResultResultSet captures the result from statements that expect a ResultSet to be returned.
 type ResultResultSet struct {
-	err               error
-	count             int
-	stmtOutput        *dynamodb.ExecuteStatementOutput
-	cursorCount       int
-	columnList        []string
-	columnTypes       map[string]reflect.Type
-	columnSourceTypes map[string]string
+	err                error
+	count              int
+	stmtOutput         *dynamodb.ExecuteStatementOutput
+	cursorCount        int
+	columnList         []string
+	columnTypes        map[string]reflect.Type
+	columnSourceTypes  map[string]string
+	columnDesiredTypes map[string]reflect.Type
 }
 
 func (r *ResultResultSet) init() *ResultResultSet {
@@ -288,6 +289,9 @@ func (r *ResultResultSet) init() *ResultResultSet {
 	if r.columnSourceTypes == nil {
 		r.columnSourceTypes = make(map[string]string)
 	}
+	if r.columnDesiredTypes == nil {
+		r.columnDesiredTypes = make(map[string]reflect.Type)
+	}
 
 	// save number of records
 	r.count = len(r.stmtOutput.Items)
@@ -299,6 +303,9 @@ func (r *ResultResultSet) init() *ResultResultSet {
 			colMap[col] = true
 			if r.columnTypes[col] == nil {
 				var value interface{}
+				if t, ok := r.columnDesiredTypes[col]; ok {
+					value = reflect.New(t).Interface()
+				}
 				_ = attributevalue.Unmarshal(av, &value)
 				r.columnTypes[col] = reflect.TypeOf(value)
 				r.columnSourceTypes[col] = nameFromAttributeValue(av)
