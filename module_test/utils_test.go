@@ -3,9 +3,10 @@ package godynamo_test
 import (
 	"context"
 	"fmt"
-	"github.com/miyamo2/godynamo"
 	"testing"
 	"time"
+
+	"github.com/himgang/godynamo"
 )
 
 func TestTransformInsertStmToPartiQL(t *testing.T) {

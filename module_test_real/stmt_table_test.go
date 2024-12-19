@@ -3,10 +3,11 @@ package godynamo_test
 import (
 	"context"
 	"fmt"
-	"github.com/miyamo2/godynamo"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/himgang/godynamo"
 )
 
 func Test_Query_CreateTable(t *testing.T) {

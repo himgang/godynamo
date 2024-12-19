@@ -2,13 +2,13 @@ module godynamo_test
 
 go 1.18
 
-replace github.com/miyamo2/godynamo => ../
+replace github.com/himgang/godynamo => ../
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.34.1
 	github.com/btnguyen2k/consu/reddo v0.1.9
 	github.com/btnguyen2k/consu/semita v0.1.5
-	github.com/miyamo2/godynamo v0.0.0-00010101000000-000000000000
+	github.com/himgang/godynamo v0.0.0-00010101000000-000000000000
 )
 
 require (

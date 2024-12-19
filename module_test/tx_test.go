@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/miyamo2/godynamo"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/himgang/godynamo"
 )
 
 func TestTx_Empty(t *testing.T) {

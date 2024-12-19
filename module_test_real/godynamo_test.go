@@ -2,10 +2,11 @@ package godynamo_test
 
 import (
 	"database/sql"
-	_ "github.com/miyamo2/godynamo"
 	"os"
 	"strings"
 	"testing"
+
+	_ "github.com/himgang/godynamo"
 )
 
 //var (

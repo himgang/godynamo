@@ -2,12 +2,13 @@ package godynamo_test
 
 import (
 	"fmt"
-	"github.com/aws/smithy-go"
-	"github.com/miyamo2/godynamo"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/aws/smithy-go"
+	"github.com/himgang/godynamo"
 
 	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
