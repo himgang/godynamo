@@ -3,15 +3,16 @@ package godynamo
 import (
 	"database/sql"
 	"database/sql/driver"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"os"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+
+	"github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/btnguyen2k/consu/reddo"
 )
