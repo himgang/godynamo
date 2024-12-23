@@ -269,13 +269,14 @@ func (r *ResultNoResultSet) RowsAffected() (int64, error) {
 
 // ResultResultSet captures the result from statements that expect a ResultSet to be returned.
 type ResultResultSet struct {
-	err               error
-	count             int
-	stmtOutput        *dynamodb.ExecuteStatementOutput
-	cursorCount       int
-	columnList        []string
-	columnTypes       map[string]reflect.Type
-	columnSourceTypes map[string]string
+	err                error
+	count              int
+	stmtOutput         *dynamodb.ExecuteStatementOutput
+	cursorCount        int
+	columnList         []string
+	columnTypes        map[string]reflect.Type
+	columnSourceTypes  map[string]string
+	columnDesiredTypes map[string]reflect.Type
 }
 
 func (r *ResultResultSet) init() *ResultResultSet {
@@ -289,6 +290,10 @@ func (r *ResultResultSet) init() *ResultResultSet {
 		r.columnSourceTypes = make(map[string]string)
 	}
 
+	if r.columnDesiredTypes == nil {
+		r.columnDesiredTypes = make(map[string]reflect.Type)
+	}
+
 	// save number of records
 	r.count = len(r.stmtOutput.Items)
 
@@ -300,6 +305,20 @@ func (r *ResultResultSet) init() *ResultResultSet {
 			if r.columnTypes[col] == nil {
 				var value interface{}
 				_ = attributevalue.Unmarshal(av, &value)
+				//custom handling as dynamo only loads number as float64
+				if value != nil {
+					// Check if the column exists in the map
+					if t, ok := r.columnDesiredTypes[col]; ok {
+						switch t.Kind() {
+						case reflect.Int:
+							value = int(value.(float64))
+						case reflect.Int32:
+							value = int32(value.(float64))
+						case reflect.Int64:
+							value = int64(value.(float64))
+						}
+					}
+				}
 				r.columnTypes[col] = reflect.TypeOf(value)
 				r.columnSourceTypes[col] = nameFromAttributeValue(av)
 			}
@@ -356,6 +375,20 @@ func (r *ResultResultSet) Next(dest []driver.Value) error {
 	for i, colName := range r.columnList {
 		var value interface{}
 		_ = attributevalue.Unmarshal(rowData[colName], &value)
+		//custom handling as dynamo only loads number as float64
+		if value != nil {
+			// Check if the column exists in the map
+			if t, ok := r.columnDesiredTypes[colName]; ok {
+				switch t.Kind() {
+				case reflect.Int:
+					value = int(value.(float64))
+				case reflect.Int32:
+					value = int32(value.(float64))
+				case reflect.Int64:
+					value = int64(value.(float64))
+				}
+			}
+		}
 		dest[i] = value
 	}
 	return nil
