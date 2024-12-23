@@ -27,11 +27,13 @@ type StmtExecutable struct {
 	*Stmt
 }
 
+type CtxStrWrap string
+
 var (
-	reStringLiteralSingle         = regexp.MustCompile(`'[^']*'`)
-	reStringLiteralDouble         = regexp.MustCompile(`"[^\"]*"`)
-	TableColumnDesiredTypesMapKey = "go_dynamo_table_column_desired_types_map"
-	TableNameKey                  = "go_dynamo_table_name"
+	reStringLiteralSingle                    = regexp.MustCompile(`'[^']*'`)
+	reStringLiteralDouble                    = regexp.MustCompile(`"[^\"]*"`)
+	TableColumnDesiredTypesMapKey CtxStrWrap = "go_dynamo_table_column_desired_types_map"
+	TableNameKey                  CtxStrWrap = "go_dynamo_table_name"
 )
 
 func (s *StmtExecutable) parse() error {
