@@ -374,6 +374,20 @@ func (r *ResultResultSet) Next(dest []driver.Value) error {
 	for i, colName := range r.columnList {
 		var value interface{}
 		_ = attributevalue.Unmarshal(rowData[colName], &value)
+		//custom handling as dynamo only loads number as float64
+		if value != nil {
+			// Check if the column exists in the map
+			if t, ok := r.columnDesiredTypes[colName]; ok {
+				switch t.Kind() {
+				case reflect.Int:
+					value = int(value.(float64))
+				case reflect.Int32:
+					value = int32(value.(float64))
+				case reflect.Int64:
+					value = int64(value.(float64))
+				}
+			}
+		}
 		dest[i] = value
 	}
 	return nil
