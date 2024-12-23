@@ -205,6 +205,8 @@ fmt.Println("RowsAffected:", rowsAffected2) // output "RowsAffected: 1"
 **Numerical values** are stored in DynamoDB as floating point numbers. Hence, numbers are always read back as `float64`. 
 See [DynamoDB document](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes) for details on DynamoDB's supported data types.
 
+**To bypass above limitation we are providing a workaround where you can set the dbcolumnname vs column type map in ctx of a request and while unmarshalling instead of default unmarshalling we use the provided int type.
+
 **A single query can only return up to [1MB of data](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.Pagination.html)**.
 In the case of `SELECT` query, the driver automatically issues additional queries to fetch the remaining data if needed.
 However, returned rows may not be in the expected order specified by `ORDER BY` clause. 
